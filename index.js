@@ -66,7 +66,8 @@ io.on('connection',async(socket)=>{
     userData.balance = userData.budget - userData.expenses;
 
     await BudgetModel.findOneAndUpdate({user:userEmail}, userData);
-    socket.emit('expenseDeduct',JSON.stringify(await BudgetModel.findOne({user:userEmail})));
+    const userDataAfterAddingExpense = await BudgetModel.findOne({user:userEmail})
+    socket.emit('expenseDeduct',JSON.stringify(userDataAfterAddingExpense));
   });
 
   // Transactions Update
@@ -80,7 +81,8 @@ io.on('connection',async(socket)=>{
 
 
     await BudgetModel.findOneAndUpdate({user:userEmail}, userData);
-    socket.emit('updatedExpenses',JSON.stringify(await BudgetModel.findOne({user:userEmail})));
+    const userDataAfterRemovedExpense = await BudgetModel.findOne({user:userEmail})
+    socket.emit('updatedExpenses',JSON.stringify(userDataAfterRemovedExpense));
   })
 
   // console.log(userData)
