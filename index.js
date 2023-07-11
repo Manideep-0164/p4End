@@ -50,8 +50,8 @@ io.on('connection',async(socket)=>{
     userData.budget = budgetamt;
     userData.balance = budgetamt - userData.expenses;
     await BudgetModel.findOneAndUpdate({user:userEmail}, userData);
-
-    socket.emit('updatedBudget',JSON.stringify(await BudgetModel.findOne({user:userEmail})));
+    const newBudget = await BudgetModel.findOne({user:userEmail})
+    socket.emit('updatedBudget',JSON.stringify(newBudget));
 
   });
 
