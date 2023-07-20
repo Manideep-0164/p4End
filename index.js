@@ -21,13 +21,17 @@ app.use(cookieParser());
 app.use(cors())
 app.use(express.json())
 
+app.get("/",(req,res) => {
+  res.status(200).json({message:"Server in live"});
+})
+
 app.use("/users",userRouter)
 
 
-app.get("/",auth,(req,res)=>{
-  console.log(req.user)
-    res.sendFile("C:/Users/ABDUL HASEEB T K/OneDrive/Desktop/filthy-cemetery-1257/frontend/index.html")
-})
+// app.get("/",auth,(req,res)=>{
+//   console.log(req.user)
+//     res.sendFile("C:/Users/ABDUL HASEEB T K/OneDrive/Desktop/filthy-cemetery-1257/frontend/index.html")
+// })
 
 
 
