@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
 const { UserModel } = require("../model/user.model")
-const { client } = require("../config/redis")
+// const { client } = require("../config/redis")
 
 
 const auth = async (req, res, next) => {
@@ -24,11 +24,11 @@ const auth = async (req, res, next) => {
             const { userId } = decoded
 
             if (decoded) {
-                const isTokenBlacklist = await client.get(token);
+                // const isTokenBlacklist = await client.get(token);
 
-                if (isTokenBlacklist) {
-                    return res.status(400).send({ msg: "token blacklisted" });
-                }
+                // if (isTokenBlacklist) {
+                //     return res.status(400).send({ msg: "token blacklisted" });
+                // }
                 const user = await UserModel.findById(userId)
                 req.user = user
                 next()
