@@ -103,7 +103,6 @@ io.on('connection',async(socket)=>{
       JSON.stringify(await BudgetModel.findOne({ user: userEmail }))
     );
   });
-});
 
   // console.log(userData)
 
