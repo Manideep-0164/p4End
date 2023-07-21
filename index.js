@@ -89,6 +89,22 @@ io.on('connection',async(socket)=>{
     socket.emit('updatedExpenses',JSON.stringify(userDataAfterRemovedExpense));
   })
 
+   socket.on("updateExpenses", async (data) => {
+    data = JSON.parse(data);
+
+    userData.transactions = data.newData;
+    userData.expenses += data.amt;
+    userData.balance -= data.amt;
+
+    await BudgetModel.findOneAndUpdate({ user: userEmail }, userData);
+
+    socket.emit(
+      "updatedExpenses",
+      JSON.stringify(await BudgetModel.findOne({ user: userEmail }))
+    );
+  });
+});
+
   // console.log(userData)
 
 })
@@ -103,11 +119,9 @@ io.on('connection',async(socket)=>{
 // refresh token
 app.get("/getnewtoken", (req, res) => {
     const refreshtoken = req.cookies.refreshtoken
-    console.log(refreshtoken)
    try {
    if(refreshtoken){
     const decoded = jwt.verify(refreshtoken, process.env.REFRESH_SECRET)
-    console.log(decoded)
     if(decoded){
       const token = jwt.sign({ userId: decoded.userId }, process.env.JWT_SECRET, {
         expiresIn: 60
@@ -140,7 +154,6 @@ function(req, res) {
     const token = jwt.sign({ userId: req.user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h"
     });
-    console.log(token)
     res.cookie('token',token)
   // res.redirect('/');
   res.sendFile("C:/Users/ABDUL HASEEB T K/OneDrive/Desktop/filthy-cemetery-1257/frontend/index.html")
