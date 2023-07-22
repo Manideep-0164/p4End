@@ -56,9 +56,11 @@ io.on('connection',async(socket)=>{
           reject(err);
         } else if (cachedData) {
           // Data found in cache
+          console.log("redis")
           resolve(JSON.parse(cachedData));
         } else {
           // Data not found in cache, fetch from the database and cache it
+          console.log("db")
           const userFetchedData = await BudgetModel.findOne({
             user: userEmail,
           });
