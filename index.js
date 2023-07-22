@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require("socket.io")
 require("dotenv").config()
 const jwt = require("jsonwebtoken")
+const { client } = require("./config/redis");
 const {connection} = require("./config/db")
 const {userRouter} = require("./routers/user.route")
 const {auth, socketAuth} = require("./middleware/auth.middleware")
@@ -45,7 +46,31 @@ io.on('connection',async(socket)=>{
 
   // getting the default data of the user
   const {userEmail} = socket.handshake.query;
-  const userData = await BudgetModel.findOne({user:userEmail});
+  
+    // Function to fetch user data from Redis or the database if not available in cache
+  const fetchUserData = async () => {
+    return new Promise((resolve, reject) => {
+      client.get(userEmail, async (err, cachedData) => {
+        if (err) {
+          console.error("Error fetching data from Redis:", err);
+          reject(err);
+        } else if (cachedData) {
+          // Data found in cache
+          resolve(JSON.parse(cachedData));
+        } else {
+          // Data not found in cache, fetch from the database and cache it
+          const userFetchedData = await BudgetModel.findOne({
+            user: userEmail,
+          });
+          client.setex(userEmail, 3600, JSON.stringify(userFetchedData)); // Cache data for an hour (3600 seconds)
+          resolve(userFetchedData);
+        }
+      });
+    });
+  };
+  
+  // Get the default data
+  const userData = await fetchUserData();
   socket.emit('defaultBudget', JSON.stringify(userData));
 
   // Budget amt update
@@ -53,9 +78,11 @@ io.on('connection',async(socket)=>{
 
     userData.budget = budgetamt;
     userData.balance = budgetamt - userData.expenses;
+    
     await BudgetModel.findOneAndUpdate({user:userEmail}, userData);
-    const newBudget = await BudgetModel.findOne({user:userEmail})
-    socket.emit('updatedBudget',JSON.stringify(newBudget));
+    client.setex(userEmail, 3600, JSON.stringify(userData));      // Update the cached data
+    const upDatedUserData = await fetchUserData()
+    socket.emit('updatedBudget',JSON.stringify(upDatedUserData));
 
   });
 
@@ -70,7 +97,8 @@ io.on('connection',async(socket)=>{
     userData.balance = userData.budget - userData.expenses;
 
     await BudgetModel.findOneAndUpdate({user:userEmail}, userData);
-    const userDataAfterAddingExpense = await BudgetModel.findOne({user:userEmail})
+    client.setex(userEmail, 3600, JSON.stringify(userData));      // Update the cached data
+    const userDataAfterAddingExpense = await fetchUserData()
     socket.emit('expenseDeduct',JSON.stringify(userDataAfterAddingExpense));
   });
 
@@ -85,7 +113,8 @@ io.on('connection',async(socket)=>{
 
 
     await BudgetModel.findOneAndUpdate({user:userEmail}, userData);
-    const userDataAfterRemovedExpense = await BudgetModel.findOne({user:userEmail})
+    client.setex(userEmail, 3600, JSON.stringify(userData));      // Update the cached data
+    const userDataAfterRemovedExpense = await fetchUserData()
     socket.emit('updatedExpenses',JSON.stringify(userDataAfterRemovedExpense));
   })
 
@@ -97,10 +126,11 @@ io.on('connection',async(socket)=>{
     userData.balance -= data.amt;
 
     await BudgetModel.findOneAndUpdate({ user: userEmail }, userData);
-
+    client.setex(userEmail, 3600, JSON.stringify(userData));      // Update the cached data
+    const updatedExpenseData = await fetchUserData()
     socket.emit(
       "updatedExpenses",
-      JSON.stringify(await BudgetModel.findOne({ user: userEmail }))
+      JSON.stringify(updatedExpenseData)
     );
   });
 
