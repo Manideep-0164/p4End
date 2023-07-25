@@ -177,12 +177,12 @@ app.get(
   }
 );
 
-server.listen(8080, async () => {
+server.listen(process.env.PORT, async () => {
   try {
     await connection;
     console.log("server connected to db");
   } catch (error) {
     console.log(error.message);
   }
-  console.log(`server is connected to port ${process.env.port} `);
+  console.log(`server is connected to port ${process.env.PORT} `);
 });
