@@ -74,8 +74,8 @@ io.on("connection", async (socket) => {
 
     await BudgetModel.findOneAndUpdate({ user: userEmail }, userData);
     client.setex(userEmail, 3600, JSON.stringify(userData)); // Update the cached data
-    const upDatedUserData = await fetchUserData();
-    socket.emit("updatedBudget", JSON.stringify(upDatedUserData));
+    // const upDatedUserData = await fetchUserData();
+    socket.emit("updatedBudget", JSON.stringify(userData));
   });
 
   // Expenses Upadate
@@ -89,8 +89,8 @@ io.on("connection", async (socket) => {
 
     await BudgetModel.findOneAndUpdate({ user: userEmail }, userData);
     client.setex(userEmail, 3600, JSON.stringify(userData)); // Update the cached data
-    const userDataAfterAddingExpense = await fetchUserData();
-    socket.emit("expenseDeduct", JSON.stringify(userDataAfterAddingExpense));
+    // const userDataAfterAddingExpense = await fetchUserData();
+    socket.emit("expenseDeduct", JSON.stringify(userData));
   });
 
   // Transactions Update
@@ -103,8 +103,8 @@ io.on("connection", async (socket) => {
 
     await BudgetModel.findOneAndUpdate({ user: userEmail }, userData);
     client.setex(userEmail, 3600, JSON.stringify(userData)); // Update the cached data
-    const userDataAfterRemovedExpense = await fetchUserData();
-    socket.emit("updatedExpenses", JSON.stringify(userDataAfterRemovedExpense));
+    // const userDataAfterRemovedExpense = await fetchUserData();
+    socket.emit("updatedExpenses", JSON.stringify(userData));
   });
 
   socket.on("updateExpenses", async (data) => {
@@ -116,8 +116,8 @@ io.on("connection", async (socket) => {
 
     await BudgetModel.findOneAndUpdate({ user: userEmail }, userData);
     client.setex(userEmail, 3600, JSON.stringify(userData)); // Update the cached data
-    const updatedExpenseData = await fetchUserData();
-    socket.emit("updatedExpenses", JSON.stringify(updatedExpenseData));
+    // const updatedExpenseData = await fetchUserData();
+    socket.emit("updatedExpenses", JSON.stringify(userData));
   });
 });
 
